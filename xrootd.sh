@@ -16,6 +16,7 @@ build_requires:
 prefer_system: .*
 prefer_system_check: |
   true
+---
 #!/bin/bash -e
 
 XROOTD_PYTHON=""
