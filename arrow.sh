@@ -23,6 +23,7 @@ env:
 ---
 
 mkdir -p $INSTALLROOT
+SONAME=so
 case $ARCHITECTURE in
   osx*)
     # If we preferred system tools, we need to make sure we can pick them up.
@@ -44,9 +45,16 @@ __ZNK4llvm*
 EOF
     CMAKE_SHARED_LINKER_FLAGS="-Wl,-unexported_symbols_list,$PWD/no-llvm-symbols.txt"
   ;;
-  *) SONAME=so ;;
+  arch*)
+    #[[ ! $RE2_ROOT ]] && RE2_ROOT=/usr
+    [[ ! $LZ4_ROOT ]] && LZ4_ROOT=$(dirname $(dirname $(which lz4)))
+    [[ ! $RAPIDJSON_ROOT ]] && RAPIDJSON_ROOT=/usr
+    CLANG_EXECUTABLE=/usr/bin/clang++
+    [[ ! $CLANG_VERSION ]] && CLANG_VERSION=$($CLANG_EXECUTABLE --version | grep version | sed 's|.*version ||')
+  ;;
 esac
 
+echo "CLANG_VERSION: $CLANG_VERSION"
 # Downloaded by CMake, built, and linked statically (not needed at runtime):
 #   zlib, lz4, brotli
 #
@@ -58,17 +66,24 @@ esac
 
 mkdir -p ./src_tmp
 rsync -a --exclude='**/.git' --delete --delete-excluded "$SOURCEDIR/" ./src_tmp/
+CLANG_VERSION_SHORT=`echo $CLANG_VERSION | sed "s/\.[0-9]*\$//" | sed "s/^v//"`
+CLANG_VERSION_MAIN=`echo $CLANG_VERSION | sed "s/\(\.[0-9]\)*\$//" | sed "s/^v//"`
+sed -i.deleteme -e "s/set(ARROW_LLVM_VERSION \".*\")/set(ARROW_LLVM_VERSION \"$CLANG_VERSION_SHORT\")/" "./src_tmp/cpp/CMakeLists.txt" || true
+sed -i.deleteme -e "s/set(ARROW_LLVM_VERSIONS \".*\")/set(ARROW_LLVM_VERSIONS \"$CLANG_VERSION_SHORT\")/" "./src_tmp/cpp/CMakeLists.txt" || true
 
 case $ARCHITECTURE in
   osx*)
    CLANG_EXECUTABLE=/usr/bin/clang
    ;;
   *)
-   CLANG_EXECUTABLE=${CLANG_ROOT}/bin-safe/clang
+   # CLANG_EXECUTABLE=${CLANG_ROOT}/bin-safe/clang
    # this patches version script to hide llvm symbols in gandiva library
    sed -i.deleteme '/^[[:space:]]*extern/ a \ \ \ \ \ \ llvm*; LLVM*;' "./src_tmp/cpp/src/gandiva/symbols.map"
+   sed -i.deleteme 's/CMAKE_CXX_STANDARD 11/CMAKE_CXX_STANDARD 17/' "./src_tmp/cpp/cmake_modules/SetupCxxFlags.cmake"
    ;;
 esac
+
+export LDFLAGS=-lpthread
 
 cmake ./src_tmp/cpp                                                                                 \
       ${CMAKE_SHARED_LINKER_FLAGS:+-DCMAKE_SHARED_LINKER_FLAGS=${CMAKE_SHARED_LINKER_FLAGS}}        \
@@ -95,7 +110,8 @@ cmake ./src_tmp/cpp                                                             
       ${PROTOBUF_ROOT:+-DProtobuf_PROTOC_LIBRARY=$PROTOBUF_ROOT/lib/libprotoc.$SONAME}              \
       ${PROTOBUF_ROOT:+-DProtobuf_INCLUDE_DIR=$PROTOBUF_ROOT/include}                               \
       ${PROTOBUF_ROOT:+-DProtobuf_PROTOC_EXECUTABLE=$PROTOBUF_ROOT/bin/protoc}                      \
-      ${BOOST_ROOT:+-DBoost_ROOT=$BOOST_ROOT}                                                       \
+      ${BOOST_ROOT:+-DBoost_DIR=$BOOST_ROOT}                                                        \
+      ${BOOST_ROOT:+-DBoost_INCLUDE_DIR=$BOOST_ROOT/include -DBoost_NO_BOOST_CMAKE=ON}              \
       ${LZ4_ROOT:+-DLZ4_ROOT=${LZ4_ROOT}}                                                           \
       ${UTF8PROC_ROOT:+-Dutf8proc_ROOT=${UTF8PROC_ROOT}}                                            \
       ${OPENSSL_ROOT:+-DOpenSSL_ROOT=${OPENSSL_ROOT}}                                               \
@@ -112,9 +128,11 @@ cmake ./src_tmp/cpp                                                             
       -DARROW_COMPUTE=ON                                                                            \
       -DARROW_BUILD_STATIC=OFF                                                                      \
       -DCMAKE_INSTALL_RPATH_USE_LINK_PATH=ON                                                        \
+      -DARROW_LLVM_VERSIONS=$CLANG_VERSION_MAIN                                                     \
       -DCLANG_EXECUTABLE=${CLANG_EXECUTABLE}
 
 make ${JOBS:+-j $JOBS}
+#VERBOSE=1 make ${JOBS:+-j $JOBS}
 make install
 find $INSTALLROOT/share -name '*-gdb.py' -exec mv {} $INSTALLROOT/lib \;
 

@@ -33,6 +33,9 @@ case $ARCHITECTURE in
         [[ ! $ZEROMQ_ROOT ]] && ZEROMQ_ROOT=$(brew --prefix zeromq)
         [[ ! $FMT_ROOT ]] && FMT_ROOT=`brew --prefix fmt`
     ;;
+  arch*)
+    [[ ! $LZ4_ROOT ]] && LZ4_ROOT=$(dirname $(dirname $(which lz4)))
+  ;;
 esac
 
 cmake $SOURCEDIR                                                         \

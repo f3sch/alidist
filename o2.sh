@@ -126,6 +126,7 @@ valid_defaults:
   - o2-dev-fairroot
   - alo
   - o2-prod
+  - jw
 ---
 #!/bin/sh
 export ROOTSYS=$ROOT_ROOT
@@ -136,6 +137,7 @@ export ROOTSYS=$ROOT_ROOT
 # maximum safety.
 unset SIMPATH
 
+SONAME=so
 case $ARCHITECTURE in
   osx*)
     # If we preferred system tools, we need to make sure we can pick them up.
@@ -148,7 +150,9 @@ case $ARCHITECTURE in
     [[ ! $FMT_ROOT ]] && FMT_ROOT=`brew --prefix fmt`
     SONAME=dylib
   ;;
-  *) SONAME=so ;;
+  arch*)
+    export PYTHIA_ROOT=/usr
+  ;;
 esac
 
 # This affects only PR checkers
@@ -170,7 +174,8 @@ if [[ ! $CMAKE_GENERATOR && $DISABLE_NINJA != 1 && $DEVEL_SOURCES != $SOURCEDIR 
   [[ $NINJA_BIN ]] && CMAKE_GENERATOR=Ninja || true
   unset NINJA_BIN
 fi
-
+unset ALIBUILD_ENABLE_CUDA
+export DISABLE_GPU=ON
 unset DYLD_LIBRARY_PATH
 cmake $SOURCEDIR -DCMAKE_INSTALL_PREFIX=$INSTALLROOT                                                      \
       ${CMAKE_GENERATOR:+-G "$CMAKE_GENERATOR"}                                                           \
@@ -187,6 +192,7 @@ cmake $SOURCEDIR -DCMAKE_INSTALL_PREFIX=$INSTALLROOT                            
       ${DISABLE_GPU:+-DENABLE_CUDA=OFF -DENABLE_HIP=OFF -DENABLE_OPENCL=OFF -DENABLE_OPENCL2=OFF}         \
       ${ALIBUILD_ENABLE_CUDA:+-DENABLE_CUDA=ON}                                                           \
       ${ALIBUILD_ENABLE_HIP:+-DENABLE_HIP=ON}                                                             \
+      ${BOOST_ROOT:+-DBoost_NO_BOOST_CMAKE=ON}              \
       ${CURL_ROOT:+-DCURL_ROOT=$CURL_ROOT}                                                                \
       ${LIBUV_ROOT:+-DLibUV_ROOT=$LIBUV_ROOT}                                                             \
       ${BUILD_ANALYSIS:+-DBUILD_ANALYSIS=$BUILD_ANALYSIS}                                                 \

@@ -4,7 +4,7 @@ build_requires:
   - curl
 prefer_system: .*
 prefer_system_check: |
-  [[ $(uname) == Darwin ]] && /usr/libexec/java_home || exit 1; X=$(mktemp -d); cd $X && printf "public class verAliBuild { public static void main(String[] args) { if (Integer.parseInt((System.getProperty(\"java.version\")+\".\").split(\"\\\\\.\")[0]) < 10) System.exit(42); } }" > verAliBuild.java && javac verAliBuild.java && java verAliBuild && rm -rf $X
+  true
 env:
   JAVA_HOME: "$JDK_ROOT/$(cd $JDK_ROOT; ls -1d jdk*/Contents/Home)"
 prepend_path:

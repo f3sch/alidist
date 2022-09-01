@@ -5,6 +5,9 @@ tag: release-1.8.0
 build_requires:
  - "GCC-Toolchain:(?!osx)"
  - CMake
+prefer_system: .*
+prefer_system_check: |
+  true
 ---
 #!/bin/sh
 cmake $SOURCEDIR                           \

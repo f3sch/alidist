@@ -22,6 +22,9 @@ case $ARCHITECTURE in
   osx*) 
 	[[ ! $OPENSSL_ROOT ]] && OPENSSL_ROOT=$(brew --prefix openssl@1.1)
 	[[ ! $LIBWEBSOCKETS_ROOT ]] && LIBWEBSOCKETS_ROOT=$(brew --prefix libwebsockets)
+        ;;
+  arch*)
+    [[ ! JSON_C_ROOT ]] && JSON_C_ROOT=/usr
   ;;
 esac
 

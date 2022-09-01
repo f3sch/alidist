@@ -13,6 +13,9 @@ source: https://github.com/AliceO2Group/AEGIS.git
 prepend_path:
   LD_LIBRARY_PATH: "$AEGIS_ROOT/lib"
   ROOT_INCLUDE_PATH: "$AEGIS_ROOT/include"
+valid_defaults:
+  - o2
+  - jw
 ---
 #!/bin/bash -e
 FVERSION=`gfortran --version | grep -i fortran | sed -e 's/.* //' | cut -d. -f1`

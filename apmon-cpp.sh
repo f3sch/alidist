@@ -12,6 +12,12 @@ rsync -a --exclude='**/.git' --delete --delete-excluded \
       $SOURCEDIR/ ./
 autoreconf -ivf
 
+case $ARCHITECTURE in
+  arch*)
+    LIBTIRPC_ROOT=/usr
+  ;;
+esac
+
 if [[ -n ${LIBTIRPC_ROOT} ]];
 then
   export CXXFLAGS="${CXXFLAGS} -I${LIBTIRPC_ROOT}/include/tirpc"

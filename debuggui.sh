@@ -22,6 +22,11 @@ case $ARCHITECTURE in
       EXTRA_LIBS="-framework CoreFoundation -framework AppKit"
       DEFINES="-DNO_PARALLEL_SORT"
     ;;
+    arch*)
+      DEFINES="-DIMGUI_IMPL_OPENGL_LOADER_GL3W -DTRACY_NO_FILESELECTOR"
+      EXTRA_LIBS="-lGL -ltbb"
+      [[ ! $FREETYPE_ROOT ]] && FREETYPE_ROOT="/usr"
+    ;;
     *) 
       DEFINES="-DIMGUI_IMPL_OPENGL_LOADER_GL3W -DTRACY_NO_FILESELECTOR -DNO_PARALLEL_SORT"
       EXTRA_LIBS="-lGL"

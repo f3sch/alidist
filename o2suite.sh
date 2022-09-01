@@ -23,6 +23,7 @@ valid_defaults:
   - alo
   - o2-prod
   - o2-ninja
+  - jw
 ---
 #!/bin/bash -ex
 

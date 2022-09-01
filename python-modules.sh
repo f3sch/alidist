@@ -11,6 +11,9 @@ build_requires:
   - alibuild-recipe-tools
 prepend_path:
   PYTHONPATH: $PYTHON_MODULES_ROOT/share/python-modules/lib/python/site-packages
+prefer_system: .*
+prefer_system_check: |
+  true
 ---
 
 # A spurios PYTHONPATH can affect later commands

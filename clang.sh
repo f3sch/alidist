@@ -10,6 +10,9 @@ build_requires:
  - CMake
  - curl
  - ninja
+prefer_system: .*
+prefer_system_check: |
+  true
 ---
 #!/bin/sh
 

@@ -9,6 +9,9 @@ requires:
 env:
   PYTHIA8DATA: "$PYTHIA_ROOT/share/Pythia8/xmldoc"
   PYTHIA8: "$PYTHIA_ROOT"
+prefer_system: .*
+prefer_system_check: |
+  true
 ---
 #!/bin/bash -e
 rsync -a $SOURCEDIR/ ./

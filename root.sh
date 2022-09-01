@@ -1,7 +1,7 @@
 package: ROOT
 version: "%(tag_basename)s"
-tag: "v6-26-04-patches-alice1"
-source: https://github.com/alisw/root.git
+tag: "v6-24-06"
+source: https://github.com/root-project/root.git
 requires:
   - arrow
   - AliEn-Runtime:(?!.*ppc64)
@@ -74,6 +74,9 @@ case $ARCHITECTURE in
     [[ ! $OPENSSL_ROOT ]] && SYS_OPENSSL_ROOT=$(brew --prefix openssl@1.1)
     [[ ! $LIBPNG_ROOT ]] && LIBPNG_ROOT=$(brew --prefix libpng)
   ;;
+  arch*)
+    export CXXFLAGS="-I/usr/include/tirpc"
+  ;;
 esac
 
 if [[ $ALIEN_RUNTIME_VERSION ]]; then
@@ -106,6 +109,7 @@ else
   # its own XRootD version.
   ROOT_XROOTD_FLAGS='-Dxrootd=OFF'
 fi
+ROOT_XROOTD_FLAGS="-Dxrootd=ON"
 
 unset DYLD_LIBRARY_PATH
 # Standard ROOT build
@@ -153,9 +157,10 @@ cmake $SOURCEDIR                                                                
       -Dbuiltin_vdt=ON                                                                 \
       ${ALIEN_RUNTIME_REVISION:+-Dmonalisa=ON}                                         \
       -Dgviz=OFF                                                                       \
+      -Dimt=OFF                                                                        \
       -Dbuiltin_davix=OFF                                                              \
       -Dbuiltin_afterimage=ON                                                          \
-      -Dtmva-sofie=ON                                                                  \
+      ${BUILD_VMC_INTERNAL:+-Dvmc=ON}                                                  \
       -Ddavix=OFF                                                                      \
       ${DISABLE_MYSQL:+-Dmysql=OFF}                                                    \
       ${ROOT_HAS_PYTHON:+-DPYTHON_PREFER_VERSION=3}                                    \
@@ -166,7 +171,7 @@ FEATURES="builtin_pcre mathmore xml ssl opengl minuit2 http
           pythia6 roofit soversion vdt ${CXX17:+cxx17}
           ${XROOTD_ROOT:+xrootd} ${ALIEN_RUNTIME_ROOT:+monalisa} ${ROOT_HAS_PYTHON:+pyroot}
           ${ARROW_REVISION:+arrow}"
-NO_FEATURES="root7 ${LZMA_REVISION:+builtin_lzma} gviz
+NO_FEATURES="root7 ${LZMA_REVISION:+builtin_lzma} ${LIBPNG_REVISION:+builtin_png} gviz
              ${ROOT_HAS_NO_PYTHON:+pyroot} builtin_davix davix alien"
 
 if [[ $ENABLE_COCOA ]]; then

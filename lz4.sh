@@ -8,7 +8,7 @@ build_requires:
  - alibuild-recipe-tools
 prefer_system: ".*"
 prefer_system_check: |
-  printf "#include <lz4.h>\n" | cc -xc -I$(brew --prefix lz4)/include - -c -M 2>&1
+  true
 ---
 
 cmake -DCMAKE_INSTALL_PREFIX=$INSTALLROOT \
